@@ -130,7 +130,7 @@ def photo_amt(message: Message) -> None:
                                                            'Продолжаем, чтобы подобрать лучшие варианты?🏩',
                                                            'Отличненько!\n'
                                                            'Подбираем дальше лучшие предложения?🏨',
-                                                           'Отлично!\n,'
+                                                           'Отлично!\n'
                                                            'Идем дальше, искать лучшие отели?🏨']))
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -202,7 +202,8 @@ def info_low_high(message: Message) -> None:
 
                 for i_info in sort_val:
                     bot.send_message(message.from_user.id,
-                                     f'{count}. <b>{i_info[1][0]}</b> <i>Цена: {i_info[1][1]}</i>',
+                                     f'{count}. <b>{i_info[1][0]}</b>\n'
+                                     f'<i>Цена: {i_info[1][1]}</i>',
                                      parse_mode='html')
                     count += 1
 
@@ -214,7 +215,7 @@ def info_low_high(message: Message) -> None:
                 count = 1
 
                 for i_offer in sort_offers:
-                    offer_with_photo = api_requests.photo_request(i_offer[0], data['hotel_amt'])
+                    offer_with_photo = api_requests.photo_request(i_offer[0], data['photo_amt'])
                     bot.send_message(message.from_user.id,
                                      f'{count}. <b>{i_offer[1][0]}</b>\n'
                                      f'<i>Цена: {i_offer[1][1]}</i>',
@@ -365,7 +366,7 @@ def info_best_deal(message: Message) -> None:
                 count = 1
 
                 for i_offer in sort_offers:
-                    offer_with_photo = api_requests.photo_request(i_offer[0], data['hotel_amt'])
+                    offer_with_photo = api_requests.photo_request(i_offer[0], data['photo_amt'])
                     bot.send_message(message.from_user.id,
                                      f'{count}. <b>{i_offer[1][0]}</b>\n'
                                      f'<i>Цена: {i_offer[1][1]}</i>\n'
