@@ -3,7 +3,9 @@ import requests
 from loader import bot
 from telebot.types import Message
 from states.hotel_information import HotelInfoState, BestDealState
-from .in_progress import api_requests
+from utils.api_requests.city_request import city_request
+from utils.api_requests.hotels_request import hotels_request
+from utils.api_requests.photo_request import photo_request
 from time import sleep
 from random import choice
 
@@ -35,7 +37,7 @@ def any_command(message: Message) -> None:
 @bot.message_handler(state=HotelInfoState.city)
 def get_city(message: Message) -> None:
 
-    if message.text.isalpha() and api_requests.city_request(message.text):
+    if message.text.isalpha() and city_request(message.text):
         bot.set_state(message.from_user.id, HotelInfoState.hotel_amt, message.chat.id)
         sleep(2)
         bot.send_message(message.from_user.id, choice(['Отлично! Теперь введите количество отелей',
@@ -43,7 +45,7 @@ def get_city(message: Message) -> None:
                                                        'Замечательно! Сколько отелей ищем?']))
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            data['city'], data['cityID'] = api_requests.city_request(message.text)
+            data['city'], data['cityID'] = city_request(message.text)
     else:
         bot.send_message(message.from_user.id, choice(['Не нашел такого города.\n'
                                                        'Попробуйте еще раз',
@@ -82,7 +84,7 @@ def get_photos(message: Message) -> None:
         bot.send_message(message.from_user.id, choice(['Значит с фотографиями.\n'
                                                        'Введите количество фотографий',
                                                        'Хорошо, будут фотографии.📸\n'
-                                                       'Пойду нафоткаю😆'
+                                                       'Пойду нафоткаю😆\n'
                                                        'Сколько фотографий на отель?',
                                                        'Отметил у себя в блокноте.\n'
                                                        'Фотографии нужны ✅\n'
@@ -186,7 +188,7 @@ def info_low_high(message: Message) -> None:
             else:
                 sorting = high_to_low
 
-            offers = api_requests.hotels_request(data['cityID'], data['hotel_amt'], sorting)
+            offers = hotels_request(data['cityID'], data['hotel_amt'], sorting)
 
             if offers and not data['need_photo']:
 
@@ -215,7 +217,7 @@ def info_low_high(message: Message) -> None:
                 count = 1
 
                 for i_offer in sort_offers:
-                    offer_with_photo = api_requests.photo_request(i_offer[0], data['photo_amt'])
+                    offer_with_photo = photo_request(i_offer[0], data['photo_amt'])
                     bot.send_message(message.from_user.id,
                                      f'{count}. <b>{i_offer[1][0]}</b>\n'
                                      f'<i>Цена: {i_offer[1][1]}</i>',
@@ -338,12 +340,12 @@ def info_best_deal(message: Message) -> None:
                                                            'Возьмите пока что 🎧\n'
                                                            'И немного подождем...']))
 
-            offers = api_requests.hotels_request(data['cityID'],
-                                                 data['hotel_amt'],
-                                                 'DISTANCE',
-                                                 price_min=data['price_min'],
-                                                 price_max=data['price_max'],
-                                                 distance=data['distance'])
+            offers = hotels_request(data['cityID'],
+                                    data['hotel_amt'],
+                                    'DISTANCE',
+                                    price_min=data['price_min'],
+                                    price_max=data['price_max'],
+                                    distance=data['distance'])
 
             sort_offers = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
 
@@ -366,7 +368,7 @@ def info_best_deal(message: Message) -> None:
                 count = 1
 
                 for i_offer in sort_offers:
-                    offer_with_photo = api_requests.photo_request(i_offer[0], data['photo_amt'])
+                    offer_with_photo = photo_request(i_offer[0], data['photo_amt'])
                     bot.send_message(message.from_user.id,
                                      f'{count}. <b>{i_offer[1][0]}</b>\n'
                                      f'<i>Цена: {i_offer[1][1]}</i>\n'
@@ -384,7 +386,6 @@ def info_best_deal(message: Message) -> None:
                 bot.send_message(message.from_user.id, 'К сожалению, не нашел подходящих вариантов😔\n'
                                                        'Либо произошла какая-то ошибка на сервере⚠\n'
                                                        'Попробуйте выбрать другой город')
-
     else:
         bot.send_message(message.from_user.id, choice(['Скажите же мне "Да"',
                                                        'Ну прошу вас 🙏\n'
