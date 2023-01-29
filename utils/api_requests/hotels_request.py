@@ -64,12 +64,15 @@ def hotels_request(citi_id: str,
             if sort == 'DISTANCE':
                 parsed_distance = jmespath.search('data.propertySearch.properties[].'
                                                   'destinationInfo.distanceFromDestination.value', response)
-                if parsed_distance[0] <= distance:
-                    result = dict()
-                    list(map(lambda hotel_id, name, price, dist: result.update({hotel_id: [name, price, dist]}),
-                             parsed_hotel_id, parsed_name, parsed_price_rep, parsed_distance))
+                parsed_distance_ftd = list(filter(lambda x: x <= distance, parsed_distance))
+
+                result = dict()
+                list(map(lambda hotel_id, name, price, dist: result.update({hotel_id: [name, price, dist]}),
+                         parsed_hotel_id, parsed_name, parsed_price_rep, parsed_distance_ftd))
+                if result:
                     return result
                 return False
+
             else:
                 if len(length_match) > 0:
                     result = dict()
@@ -81,6 +84,6 @@ def hotels_request(citi_id: str,
 
 
 # print(hotels_request('2734', 10, "PRICE_LOW_TO_HIGH"))
-# print(hotels_request('536', 5, "DISTANCE", price_min=50, price_max=300, distance=5))
+# print(hotels_request('3000', 10, "DISTANCE", price_min=100, price_max=1000, distance=2))
 # print(hotels_request('123123', 5, "PRICE_LOW_TO_HIGH"))
 # # "PRICE_HIGH_TO_LOW" "PRICE_LOW_TO_HIGH" "DISTANCE"
