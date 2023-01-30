@@ -73,6 +73,8 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                      reply_markup=row_address_and_on_map(i_info[0]),
                                      parse_mode='html')
                     count += 1
+                else:
+                    bot.delete_state(message.from_user.id, message.chat.id)
 
             elif offers and data['need_photo']:
                 sort_offers = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
@@ -99,6 +101,8 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                     bot.send_photo(message.from_user.id,
                                                    photo_file.url,
                                                    caption=f'{i_desc}')
+                else:
+                    bot.delete_state(message.from_user.id, message.chat.id)
             else:
                 bot.send_message(message.from_user.id, choice(['Произошла какая-то ошибка на сервере.\n'
                                                                'Попробуйте выбрать другой город',
@@ -106,7 +110,6 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                                                'Попробуйте выбрать другой город',
                                                                'Что-то случилось на сервере\n'
                                                                'Выберите другой город']))
-
     else:
         bot.send_message(message.from_user.id, choice(['Скажите же мне "Да"',
                                                        'Ну прошу вас 🙏\n'

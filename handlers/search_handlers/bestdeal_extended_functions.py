@@ -35,7 +35,7 @@ def get_price_max(message: Message) -> None:
         bot.set_state(message.from_user.id, BestDealState.distance, message.chat.id)
         bot.send_message(message.from_user.id, choice(['А теперь введите расстояние до центра города (км)',
                                                        'Теперь мне нужно знать -\n'
-                                                       'Какое расстояние до центра вас устроит (км)',
+                                                       'Какое расстояние до центра вас устроит (км)?',
                                                        'Теперь нужно ввести расстояние до центра города (км)']))
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:

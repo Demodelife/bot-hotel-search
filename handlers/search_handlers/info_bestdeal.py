@@ -32,67 +32,71 @@ def info_best_deal(message: Message) -> None:
                             f"Максимальная цена: {data['price_max']}$\n" \
                             f"Расстояние до центра: {data['distance']} км"
 
-            bot.send_message(message.from_user.id, full_info)
-            bot.send_message(message.from_user.id, choice(['Ожидайте...',
-                                                           'Можно 💤? Ждём...',
-                                                           'Тик-так ⌛ Ожидаем...',
-                                                           'Надеюсь моя 🔋 не сядет...\n'
-                                                           'Шучу😉 Просто чуток подождем...',
-                                                           'Возьмите пока что 🎧\n'
-                                                           'И немного подождем...']))
+        bot.send_message(message.from_user.id, full_info)
+        bot.send_message(message.from_user.id, choice(['Ожидайте...',
+                                                       'Можно 💤? Ждём...',
+                                                       'Тик-так ⌛ Ожидаем...',
+                                                       'Надеюсь моя 🔋 не сядет...\n'
+                                                       'Шучу😉 Просто чуток подождем...',
+                                                       'Возьмите пока что 🎧\n'
+                                                       'И немного подождем...']))
 
-            offers = post_hotels_request(data['cityID'],
-                                         data['hotel_amt'],
-                                         'DISTANCE',
-                                         price_min=data['price_min'],
-                                         price_max=data['price_max'],
-                                         distance=data['distance'])
+        offers = post_hotels_request(data['cityID'],
+                                     data['hotel_amt'],
+                                     'DISTANCE',
+                                     price_min=data['price_min'],
+                                     price_max=data['price_max'],
+                                     distance=data['distance'])
 
-            sort_offers = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
+        sort_offers = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
 
-            if offers and not data['need_photo']:
-                bot.send_message(message.from_user.id, choice(['Подобраны следующие варианты:',
-                                                               'Что удалось подобрать:',
-                                                               'Подобрал следующее:']))
+        if offers and not data['need_photo']:
+            bot.send_message(message.from_user.id, choice(['Подобраны следующие варианты:',
+                                                           'Что удалось подобрать:',
+                                                           'Подобрал следующее:']))
 
-                count = 1
+            count = 1
 
-                for i_info in sort_offers:
+            for i_info in sort_offers:
 
-                    bot.send_message(message.from_user.id,
-                                     f'{count}. <b>{i_info[1][0]}</b>\n'
-                                     f'<i>Цена: {i_info[1][1]}</i>\n'
-                                     f'<i>Расстояние до центра: {i_info[1][2]} км</i>',
-                                     reply_markup=row_address_and_on_map(i_info[0]),
-                                     parse_mode='html')
-                    count += 1
-
-            elif offers and data['need_photo']:
-                count = 1
-
-                for i_offer in sort_offers:
-                    offer_with_photo = post_detail_request(i_offer[0], data['photo_amt'])
-
-                    bot.send_message(message.from_user.id,
-                                     f'{count}. <b>{i_offer[1][0]}</b>\n'
-                                     f'<i>Цена: {i_offer[1][1]}</i>\n'
-                                     f'<i>Расстояние до центра: {i_offer[1][2]} км</i>',
-                                     reply_markup=row_address_and_on_map(i_offer[0]),
-                                     parse_mode='html')
-                    count += 1
-
-                    for i_name, i_lst in offer_with_photo.items():
-                        if i_name not in ('address', 'static_img'):
-                            for i_dct in i_lst:
-                                for i_url, i_desc in i_dct.items():
-                                    photo_file = requests.get(i_url)
-                                    bot.send_photo(message.from_user.id,
-                                                   photo_file.url,
-                                                   caption=f'{i_desc}')
+                bot.send_message(message.from_user.id,
+                                 f'{count}. <b>{i_info[1][0]}</b>\n'
+                                 f'<i>Цена: {i_info[1][1]}</i>\n'
+                                 f'<i>Расстояние до центра: {i_info[1][2]} км</i>',
+                                 reply_markup=row_address_and_on_map(i_info[0]),
+                                 parse_mode='html')
+                count += 1
             else:
-                bot.send_message(message.from_user.id, 'К сожалению, не нашел подходящих вариантов😔\n'
-                                                       'Либо произошла какая-то ошибка на сервере⚠\n'
-                                                       'Попробуйте выбрать другой город')
+                bot.delete_state(message.from_user.id, message.chat.id)
+
+        elif offers and data['need_photo']:
+            count = 1
+
+            for i_offer in sort_offers:
+                offer_with_photo = post_detail_request(i_offer[0], data['photo_amt'])
+
+                bot.send_message(message.from_user.id,
+                                 f'{count}. <b>{i_offer[1][0]}</b>\n'
+                                 f'<i>Цена: {i_offer[1][1]}</i>\n'
+                                 f'<i>Расстояние до центра: {i_offer[1][2]} км</i>',
+                                 reply_markup=row_address_and_on_map(i_offer[0]),
+                                 parse_mode='html')
+                count += 1
+
+                for i_name, i_lst in offer_with_photo.items():
+                    if i_name not in ('address', 'static_img'):
+                        for i_dct in i_lst:
+                            for i_url, i_desc in i_dct.items():
+                                photo_file = requests.get(i_url)
+                                bot.send_photo(message.from_user.id,
+                                               photo_file.url,
+                                               caption=f'{i_desc}')
+            else:
+                bot.delete_state(message.from_user.id, message.chat.id)
+        else:
+            bot.send_message(message.from_user.id, 'К сожалению, не нашел подходящих вариантов😔\n'
+                                                   'Либо произошла какая-то ошибка на сервере⚠\n'
+                                                   'Попробуйте выбрать другой город')
     else:
         bot.send_message(message.from_user.id, choice(['Скажите же мне "Да"',
                                                        'Ну прошу вас 🙏\n'
