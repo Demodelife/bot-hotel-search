@@ -4,7 +4,7 @@ from typing import Any
 from .api_request import api_request
 
 
-def city_request(city: str) -> Any:
+def get_city_request(city: str) -> Any:
 
     querystring = {"q": city, "locale": "ru_RU"}
 

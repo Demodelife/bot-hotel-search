@@ -4,12 +4,12 @@ from typing import Any
 from .api_request import api_request
 
 
-def hotels_request(citi_id: str,
-                   hotels_amt: int,
-                   sort: str,
-                   price_min: int = 50,
-                   price_max: int = 300,
-                   distance: int = 0) -> Any:
+def post_hotels_request(citi_id: str,
+                        hotels_amt: int,
+                        sort: str,
+                        price_min: int = 50,
+                        price_max: int = 300,
+                        distance: int = 0) -> Any:
 
     payload = {
         "currency": "USD",

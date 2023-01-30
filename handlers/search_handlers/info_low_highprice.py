@@ -1,15 +1,16 @@
 import requests
 from loader import bot
-from telebot.types import Message
+from telebot.types import Union, CallbackQuery, Message
 from states.hotel_information import HotelInfoState, BestDealState
-from utils.api_requests.hotels_request import hotels_request
-from utils.api_requests.photo_request import photo_request
+from utils.api_requests.hotels_request import post_hotels_request
+from utils.api_requests.detail_request import post_detail_request
 from random import choice
 from . import base_commands
+from keyboards.inline.all_keyboards import row_address_and_on_map
 
 
 @bot.message_handler(state=HotelInfoState.info_low_high)
-def info_low_high(message: Message) -> None:
+def info_low_high(message: Union[CallbackQuery, Message]) -> None:
 
     if message.text == 'Да':
         if base_commands.is_best_deal:
@@ -50,7 +51,7 @@ def info_low_high(message: Message) -> None:
             else:
                 sorting = high_to_low
 
-            offers = hotels_request(data['cityID'], data['hotel_amt'], sorting)
+            offers = post_hotels_request(data['cityID'], data['hotel_amt'], sorting)
 
             if offers and not data['need_photo']:
 
@@ -65,9 +66,11 @@ def info_low_high(message: Message) -> None:
                 count = 1
 
                 for i_info in sort_val:
+
                     bot.send_message(message.from_user.id,
                                      f'{count}. <b>{i_info[1][0]}</b>\n'
                                      f'<i>Цена: {i_info[1][1]}</i>',
+                                     reply_markup=row_address_and_on_map(i_info[0]),
                                      parse_mode='html')
                     count += 1
 
@@ -79,20 +82,23 @@ def info_low_high(message: Message) -> None:
                 count = 1
 
                 for i_offer in sort_offers:
-                    offer_with_photo = photo_request(i_offer[0], data['photo_amt'])
+                    offer_with_photo = post_detail_request(i_offer[0], data['photo_amt'])
+
                     bot.send_message(message.from_user.id,
                                      f'{count}. <b>{i_offer[1][0]}</b>\n'
                                      f'<i>Цена: {i_offer[1][1]}</i>',
+                                     reply_markup=row_address_and_on_map(i_offer[0]),
                                      parse_mode='html')
                     count += 1
 
                     for i_name, i_lst in offer_with_photo.items():
-                        for i_dct in i_lst:
-                            for i_url, i_desc in i_dct.items():
-                                photo_file = requests.get(i_url)
-                                bot.send_photo(message.from_user.id,
-                                               photo_file.url,
-                                               caption=f'{i_desc}')
+                        if i_name not in ('address', 'static_img'):
+                            for i_dct in i_lst:
+                                for i_url, i_desc in i_dct.items():
+                                    photo_file = requests.get(i_url)
+                                    bot.send_photo(message.from_user.id,
+                                                   photo_file.url,
+                                                   caption=f'{i_desc}')
             else:
                 bot.send_message(message.from_user.id, choice(['Произошла какая-то ошибка на сервере.\n'
                                                                'Попробуйте выбрать другой город',

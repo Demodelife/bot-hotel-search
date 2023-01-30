@@ -1,7 +1,7 @@
 from loader import bot
 from telebot.types import Message
 from states.hotel_information import HotelInfoState
-from utils.api_requests.city_request import city_request
+from utils.api_requests.city_request import get_city_request
 from time import sleep
 from random import choice
 
@@ -32,7 +32,7 @@ def any_command(message: Message) -> None:
 @bot.message_handler(state=HotelInfoState.city)
 def get_city(message: Message) -> None:
 
-    if message.text.isalpha() and city_request(message.text):
+    if message.text.isalpha() and get_city_request(message.text):
         bot.set_state(message.from_user.id, HotelInfoState.hotel_amt, message.chat.id)
         sleep(2)
         bot.send_message(message.from_user.id, choice(['Отлично! Теперь введите количество отелей',
@@ -40,7 +40,7 @@ def get_city(message: Message) -> None:
                                                        'Замечательно! Сколько отелей ищем?']))
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            data['city'], data['cityID'] = city_request(message.text)
+            data['city'], data['cityID'] = get_city_request(message.text)
     else:
         bot.send_message(message.from_user.id, choice(['Не нашел такого города.\n'
                                                        'Попробуйте еще раз',
@@ -79,7 +79,7 @@ def get_photos(message: Message) -> None:
         bot.send_message(message.from_user.id, choice(['Значит с фотографиями.\n'
                                                        'Введите количество фотографий',
                                                        'Хорошо, будут фотографии.📸\n'
-                                                       'Пойду нафоткаю😆\n'
+                                                       'Пойду нафоткаю😊\n'
                                                        'Сколько фотографий на отель?',
                                                        'Отметил у себя в блокноте.\n'
                                                        'Фотографии нужны ✅\n'
@@ -112,7 +112,7 @@ def get_photos(message: Message) -> None:
 
 
 @bot.message_handler(state=HotelInfoState.photo_amt)
-def photo_amt(message: Message) -> None:
+def get_photo_amt(message: Message) -> None:
     if message.text.isdigit() and 0 < int(message.text) <= 5:
         bot.set_state(message.from_user.id, HotelInfoState.info_low_high, message.chat.id)
         if not is_best_deal:
