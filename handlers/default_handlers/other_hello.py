@@ -1,4 +1,3 @@
-
 from loader import bot
 from telebot.types import Message
 from random import choice

@@ -5,21 +5,25 @@ from utils.api_requests.city_request import get_city_request
 from time import sleep
 from random import choice
 
+
 is_low_price = None
 is_best_deal = None
+cost_var = None
 
 
 @bot.message_handler(commands=['lowprice', 'highprice', 'bestdeal'])
 def any_command(message: Message) -> None:
-    global is_low_price, is_best_deal
+    global is_low_price, is_best_deal, cost_var
     if message.text[1:] == 'lowprice':
         is_low_price, is_best_deal = True, False
+        cost_var = 'дешевые'
 
     elif message.text[1:] == 'bestdeal':
         is_best_deal, is_low_price = True, False
 
     else:
         is_low_price, is_best_deal = False, False
+        cost_var = 'дорогие'
 
     bot.set_state(message.from_user.id, HotelInfoState.city, message.chat.id)
     bot.send_message(message.from_user.id, choice(['Введите название города',
@@ -76,6 +80,7 @@ def get_photos(message: Message) -> None:
     if message.text == 'Да':
 
         bot.set_state(message.from_user.id, HotelInfoState.photo_amt, message.chat.id)
+        sleep(2)
         bot.send_message(message.from_user.id, choice(['Значит с фотографиями.\n'
                                                        'Введите количество фотографий',
                                                        'Хорошо, будут фотографии.📸\n'
@@ -89,7 +94,7 @@ def get_photos(message: Message) -> None:
 
     elif message.text == 'Нет':
         bot.set_state(message.from_user.id, HotelInfoState.info_low_high, message.chat.id)
-
+        sleep(2)
         if not is_best_deal:
             bot.send_message(message.from_user.id, choice(['Вывести информацию по запросу?',
                                                            'Так...\nВыводим информацию по запросу?',

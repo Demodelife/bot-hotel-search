@@ -6,16 +6,18 @@ from utils.api_requests.hotels_request import post_hotels_request
 from utils.api_requests.detail_request import post_detail_request
 from random import choice
 from keyboards.inline.all_keyboards import row_address_and_on_map
+from loguru import logger
 
 
+@logger.catch
 @bot.message_handler(state=BestDealState.info_best_deal)
 def info_best_deal(message: Message) -> None:
     if message.text == 'Да':
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             if data['need_photo']:
                 full_info = f"Замечательно!\nВаш запрос:\n" \
+                            f'<b>"Лучшие по цене и расположению"</b>\n' \
                             f"Город: {data['city']}\n" \
-                            f"ID города: {data['cityID']}\n" \
                             f"Количество отелей: {data['hotel_amt']}\n" \
                             f"Количество фотографий: {data['photo_amt']}\n" \
                             f"Минимальная цена: {data['price_min']}$\n" \
@@ -24,15 +26,15 @@ def info_best_deal(message: Message) -> None:
 
             else:
                 full_info = f"Превосходно!\nВаш запрос:\n" \
+                            f'<b>"Лучшие по цене и расположению"</b>\n' \
                             f"Город: {data['city']}\n" \
-                            f"ID города: {data['cityID']}\n" \
                             f"Количество отелей: {data['hotel_amt']}\n" \
                             f"Без фотографий\n" \
                             f"Минимальная цена: {data['price_min']}$\n" \
                             f"Максимальная цена: {data['price_max']}$\n" \
                             f"Расстояние до центра: {data['distance']} км"
 
-        bot.send_message(message.from_user.id, full_info)
+        bot.send_message(message.from_user.id, full_info, parse_mode='html')
         bot.send_message(message.from_user.id, choice(['Ожидайте...',
                                                        'Можно 💤? Ждём...',
                                                        'Тик-так ⌛ Ожидаем...',
@@ -97,6 +99,7 @@ def info_best_deal(message: Message) -> None:
             bot.send_message(message.from_user.id, 'К сожалению, не нашел подходящих вариантов😔\n'
                                                    'Либо произошла какая-то ошибка на сервере⚠\n'
                                                    'Попробуйте выбрать другой город')
+
     else:
         bot.send_message(message.from_user.id, choice(['Скажите же мне "Да"',
                                                        'Ну прошу вас 🙏\n'

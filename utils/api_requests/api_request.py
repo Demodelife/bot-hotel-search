@@ -2,11 +2,16 @@ import requests
 import os
 from dotenv import load_dotenv
 from typing import Any, Dict, Union, List
+from loguru import logger
+
 
 load_dotenv()
 
 
-def api_request(method_endswith: str, params: Dict[str, Union[str, int, List, Dict]], method_type: str) -> Any:
+@logger.catch
+def api_request(method_endswith: str,
+                params: Dict[str, Union[str, int, List, Dict]],
+                method_type: str) -> Any:
 
     url = f"https://hotels4.p.rapidapi.com/{method_endswith}"
 
@@ -27,6 +32,7 @@ def api_request(method_endswith: str, params: Dict[str, Union[str, int, List, Di
             headers=headers)
 
 
+@logger.catch
 def get_request(url, params, headers):
     try:
         response = requests.get(
@@ -38,10 +44,13 @@ def get_request(url, params, headers):
             return response.text
 
         raise PermissionError
-    except PermissionError:
+
+    except PermissionError as exc:
+        logger.exception(exc)
         return False
 
 
+@logger.catch
 def post_request(url, params, headers):
     try:
         response = requests.post(
@@ -53,5 +62,7 @@ def post_request(url, params, headers):
             return response.text
 
         raise PermissionError
-    except PermissionError:
+
+    except PermissionError as exc:
+        logger.exception(exc)
         return False

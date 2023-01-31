@@ -1,4 +1,3 @@
-
 from loader import bot
 from telebot.types import Message
 from random import choice
@@ -11,6 +10,3 @@ def bot_hello(message: Message) -> None:
                                                    f'Добро пожаловать, {message.from_user.full_name}!',
                                                    f'Рад вас видеть, {message.from_user.full_name}!',
                                                    f'Я рад, что вы ко мне заглянули, {message.from_user.full_name}!']))
-
-
-

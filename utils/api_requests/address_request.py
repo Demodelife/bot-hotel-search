@@ -2,8 +2,10 @@ import json
 import jmespath
 from typing import Any
 from .api_request import api_request
+from loguru import logger
 
 
+@logger.catch
 def post_address_request(hotel: str) -> Any:
 
     payload = {
@@ -13,19 +15,24 @@ def post_address_request(hotel: str) -> Any:
         "siteId": 300000001,
         "propertyId": hotel
     }
+    try:
+        response = api_request("properties/v2/detail", payload, "POST")
 
-    response = api_request("properties/v2/detail", payload, "POST")
+        if response:
+            response = json.loads(response)
+            check_errors = jmespath.search('errors', response)
 
-    if response:
-        response = json.loads(response)
-        check_errors = jmespath.search('errors', response)
+            if check_errors is None:
 
-        if check_errors is None:
+                parsed_address = jmespath.search('data.propertyInfo.summary.location.address.addressLine', response)
 
-            parsed_address = jmespath.search('data.propertyInfo.summary.location.address.addressLine', response)
+                return parsed_address
 
-            return parsed_address
-    return False
+        raise PermissionError
+
+    except PermissionError as exc:
+        logger.exception(exc)
+        return False
 
 
 # print(address_request('69483'))

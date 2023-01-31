@@ -2,6 +2,9 @@ from loader import bot
 from states.contact_information import UserInfoState
 from telebot.types import Message
 from keyboards.reply.contact import request_contact
+from os import path
+from datetime import datetime
+from loguru import logger
 
 
 @bot.message_handler(commands=['survey'])
@@ -59,6 +62,7 @@ def get_city(message: Message) -> None:
         data['city'] = message.text
 
 
+@logger.catch
 @bot.message_handler(content_types=['text', 'contact'], state=UserInfoState.phone_number)
 def get_contact(message: Message) -> None:
     if message.content_type == 'contact':
@@ -71,6 +75,15 @@ def get_contact(message: Message) -> None:
                         f'Страна: {data["country"]}\n' \
                         f'Город: {data["city"]}\n' \
                         f'Номер телефона: {data["phone_number"]}'
+
+        with open(path.abspath(path.join('database', 'surveys.log')),
+                  'a', encoding='utf-8') as file:
+            time_now = datetime.now().strftime('%d-%b-%Y %H:%M:%S')
+            file.write(f'Дата: {time_now}\n'
+                       f'UserID: {message.from_user.id}\n'
+                       f'UserFullName: {message.from_user.full_name}\n'
+                       f'{full_info}\n\n')
+
         bot.send_message(message.from_user.id, full_info)
         bot.delete_state(message.from_user.id, message.chat.id)
     elif message.text == 'Нет':
@@ -83,6 +96,15 @@ def get_contact(message: Message) -> None:
                         f'Страна: {data["country"]}\n' \
                         f'Город: {data["city"]}\n' \
                         f'Номер телефона: {data["phone_number"]}'
+
+        with open(path.abspath(path.join('database', 'surveys.log')),
+                  'a', encoding='utf-8') as file:
+            time_now = datetime.now().strftime('%d-%b-%Y %H:%M:%S')
+            file.write(f'Дата: {time_now}\n'
+                       f'UserID: {message.from_user.id}\n'
+                       f'UserFullName: {message.from_user.full_name}\n'
+                       f'{full_info}\n\n')
+
         bot.send_message(message.from_user.id, full_info)
         bot.delete_state(message.from_user.id, message.chat.id)
     else:

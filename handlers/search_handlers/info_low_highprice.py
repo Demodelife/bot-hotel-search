@@ -7,8 +7,10 @@ from utils.api_requests.detail_request import post_detail_request
 from random import choice
 from . import base_commands
 from keyboards.inline.all_keyboards import row_address_and_on_map
+from loguru import logger
 
 
+@logger.catch
 @bot.message_handler(state=HotelInfoState.info_low_high)
 def info_low_high(message: Union[CallbackQuery, Message]) -> None:
 
@@ -22,19 +24,20 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
             with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
 
                 if data['need_photo']:
+
                     full_info = f"Чудесно!\nВаш запрос:\n" \
+                                f'<b>"Самые {base_commands.cost_var} отели в городе"</b>\n' \
                                 f"Город: {data['city']}\n" \
-                                f"ID города: {data['cityID']}\n" \
                                 f"Количество отелей: {data['hotel_amt']}\n" \
                                 f"Количество фотографий: {data['photo_amt']}"
                 else:
                     full_info = f"Отлично!\nВаш запрос:\n" \
+                                f'<b>"Самые {base_commands.cost_var} отели в городе"</b>\n' \
                                 f"Город: {data['city']}\n" \
-                                f"ID города: {data['cityID']}\n" \
                                 f"Количество отелей: {data['hotel_amt']}\n" \
                                 f"Без фотографий"
 
-            bot.send_message(message.from_user.id, full_info)
+            bot.send_message(message.from_user.id, full_info, parse_mode='html')
             bot.send_message(message.from_user.id, choice(['Ожидайте...',
                                                            'Можно 💤? Ждём...',
                                                            'Тик-так ⌛ Ожидаем...',
@@ -110,6 +113,7 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                                                'Попробуйте выбрать другой город',
                                                                'Что-то случилось на сервере\n'
                                                                'Выберите другой город']))
+
     else:
         bot.send_message(message.from_user.id, choice(['Скажите же мне "Да"',
                                                        'Ну прошу вас 🙏\n'

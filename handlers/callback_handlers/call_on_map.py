@@ -2,8 +2,10 @@ from loader import bot
 from telebot.types import CallbackQuery
 from utils.api_requests.detail_request import post_detail_request
 import requests
+from loguru import logger
 
 
+@logger.catch
 @bot.callback_query_handler(func=lambda call: call.data.startswith('map'))
 def callback_on_map(callback_query: CallbackQuery) -> None:
 
