@@ -5,6 +5,8 @@ db = SqliteDatabase(path.join('database', 'search_history.db'))
 
 
 class User(Model):
+    """Класс БД: Пользователь"""
+
     name = CharField()
     userID = IntegerField()
     command = CharField()
@@ -15,6 +17,7 @@ class User(Model):
 
 
 class HotelLowPrice(Model):
+    """Класс БД: Отели команды /lowprice"""
 
     owner = ForeignKeyField(User, related_name='hotels_lp')
     city = CharField()
@@ -26,6 +29,7 @@ class HotelLowPrice(Model):
 
 
 class HotelHighPrice(Model):
+    """Класс БД: Отели команды /highprice"""
 
     owner = ForeignKeyField(User, related_name='hotels_hp')
     city = CharField()
@@ -37,6 +41,7 @@ class HotelHighPrice(Model):
 
 
 class HotelBestDeal(Model):
+    """Класс БД: Отели команды /bestdeal"""
 
     owner = ForeignKeyField(User, related_name='hotels_bd')
     city = CharField()

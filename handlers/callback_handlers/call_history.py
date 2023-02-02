@@ -8,6 +8,7 @@ from keyboards.inline.all_keyboards import delete_history
 @logger.catch
 @bot.callback_query_handler(func=lambda call: call.data.startswith('last'))
 def callback_history(callback_query: CallbackQuery) -> None:
+    """Колбэк-хэндлер, обрабатывающий выбор показа истории для пользователя"""
 
     limit_cnt = 0
 
@@ -79,6 +80,9 @@ def callback_history(callback_query: CallbackQuery) -> None:
 @logger.catch
 @bot.callback_query_handler(func=lambda call: call.data == 'delete')
 def callback_delete_history(callback_query: CallbackQuery) -> None:
+    """Колбэк-хэндлер, обрабатывающий полное удаление запросов от пользователя,
+    inline-кнопка 'Да, очистить'
+    """
 
     for i_user in User.select():
         if callback_query.from_user.id == i_user.userID:

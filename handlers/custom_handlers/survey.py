@@ -10,6 +10,8 @@ from utils.create_surveys_db import Person
 
 @bot.message_handler(commands=['survey'])
 def survey(message: Message) -> None:
+    """Хэндлер команды /survey, опросника"""
+
     bot.set_state(message.from_user.id, UserInfoState.name, message.chat.id)
     bot.send_message(message.from_user.id, f'Приветствую тебя в опроснике, {message.from_user.username}! '
                                            f'Введи свое имя')
@@ -17,6 +19,8 @@ def survey(message: Message) -> None:
 
 @bot.message_handler(state=UserInfoState.name)
 def get_name(message: Message) -> None:
+    """Хэндлер состояния имени"""
+
     if message.text.isalpha():
         bot.send_message(message.from_user.id, 'Отлично, записал! Теперь можешь ввести свой возраст')
         bot.set_state(message.from_user.id, UserInfoState.age, message.chat.id)
@@ -30,6 +34,8 @@ def get_name(message: Message) -> None:
 
 @bot.message_handler(state=UserInfoState.age)
 def get_age(message: Message) -> None:
+    """Хэндлер состояния возраста"""
+
     if message.text.isdigit():
         bot.send_message(message.from_user.id, 'Отлично, записал! '
                                                'Теперь можешь ввести страну проживания')
@@ -43,6 +49,8 @@ def get_age(message: Message) -> None:
 
 @bot.message_handler(state=UserInfoState.country)
 def get_country(message: Message) -> None:
+    """Хэндлер состояния страны"""
+
     bot.send_message(message.from_user.id, 'Отлично, записал! '
                                            'Теперь можешь ввести свой город')
     bot.set_state(message.from_user.id, UserInfoState.city, message.chat.id)
@@ -53,6 +61,8 @@ def get_country(message: Message) -> None:
 
 @bot.message_handler(state=UserInfoState.city)
 def get_city(message: Message) -> None:
+    """Хэндлер состояния города"""
+
     bot.send_message(message.from_user.id,
                      'Отлично, записал!\n'
                      'Отправь свой номер нажав на кнопку или откажитесь отправив "Нет"',
@@ -66,6 +76,8 @@ def get_city(message: Message) -> None:
 @logger.catch
 @bot.message_handler(content_types=['text', 'contact'], state=UserInfoState.phone_number)
 def get_contact(message: Message) -> None:
+    """Хэндлер состояния номера телефона"""
+
     if message.content_type == 'contact':
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['phone_number'] = message.contact.phone_number

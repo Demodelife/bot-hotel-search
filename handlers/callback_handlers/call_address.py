@@ -7,6 +7,7 @@ from loguru import logger
 @logger.catch
 @bot.callback_query_handler(func=lambda call: call.data.startswith('add'))
 def callback_address(callback_query: CallbackQuery) -> None:
+    """Колбэк-хэндлер, обрабатывающий inline-кнопку 'Адрес отеля' """
 
     response = post_detail_request(callback_query.data[3:])
     result = '\n'.join(['<b>Отель:</b>',

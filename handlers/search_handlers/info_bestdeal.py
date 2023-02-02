@@ -14,6 +14,11 @@ from utils.create_search_history_db import HotelBestDeal
 @logger.catch
 @bot.message_handler(state=BestDealState.info_best_deal)
 def info_best_deal(message: Message) -> None:
+    """
+    Хэндлер состояния вывода информации по команде /bestdeal.
+    Конечное состояние для команды /bestdeal
+    """
+
     if message.text == 'Да':
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             if data['need_photo']:

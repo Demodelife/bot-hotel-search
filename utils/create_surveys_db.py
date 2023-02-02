@@ -5,6 +5,7 @@ db = SqliteDatabase(path.join('database', 'surveys.db'))
 
 
 class Person(Model):
+    """Класс БД: Пользователь опросника"""
 
     date = DateTimeField()
     userID = IntegerField()

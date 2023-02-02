@@ -7,6 +7,7 @@ from loguru import logger
 
 @logger.catch
 def post_address_request(hotel: str) -> Any:
+    """Функция, обрабатывающая запрос адреса отеля"""
 
     payload = {
         "currency": "USD",
@@ -33,6 +34,3 @@ def post_address_request(hotel: str) -> Any:
     except PermissionError as exc:
         logger.exception(exc)
         return False
-
-
-# print(address_request('69483'))

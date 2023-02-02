@@ -13,6 +13,8 @@ def post_hotels_request(citi_id: str,
                         price_max: int = 300,
                         distance: int = 0) -> Any:
 
+    """Функция, обрабатывающая списки отелей по заданному городу"""
+
     payload = {
         "currency": "USD",
         "eapid": 1,
@@ -91,9 +93,3 @@ def post_hotels_request(citi_id: str,
     except PermissionError as exc:
         logger.exception(exc)
         return False
-
-
-# print(hotels_request('2734', 10, "PRICE_LOW_TO_HIGH"))
-# print(hotels_request('3000', 10, "DISTANCE", price_min=100, price_max=1000, distance=2))
-# print(hotels_request('123123', 5, "PRICE_LOW_TO_HIGH"))
-# # "PRICE_HIGH_TO_LOW" "PRICE_LOW_TO_HIGH" "DISTANCE"

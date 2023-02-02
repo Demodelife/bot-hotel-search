@@ -8,6 +8,7 @@ from loguru import logger
 @logger.catch
 @bot.callback_query_handler(func=lambda call: call.data.startswith('map'))
 def callback_on_map(callback_query: CallbackQuery) -> None:
+    """Колбэк-хэндлер, обрабатывающий inline-кнопку 'На карте' """
 
     response = post_detail_request(callback_query.data[3:])
     image_url = response['static_img']

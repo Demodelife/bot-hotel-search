@@ -5,6 +5,8 @@ from random import choice
 
 @bot.message_handler(regexp=r'Привет|Хай|Hello')
 def other_hello(message: Message) -> None:
+    """Хэндлер, обрабатывающий приветствие от пользователя"""
+
     bot.send_message(message.from_user.id, choice(['Привет, чем я могу вам помочь?\n'
                                                    'Для списка моих команд /help',
                                                    'Привет, если понадобятся мои команды,\n'

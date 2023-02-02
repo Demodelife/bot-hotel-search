@@ -2,6 +2,8 @@ from telebot.handler_backends import State, StatesGroup
 
 
 class UserInfoState(StatesGroup):
+    """Класс состояний для команды /survey"""
+
     name = State()
     age = State()
     country = State()

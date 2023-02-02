@@ -14,6 +14,11 @@ from utils.create_search_history_db import HotelLowPrice, HotelHighPrice
 @logger.catch
 @bot.message_handler(state=HotelInfoState.info_low_high)
 def info_low_high(message: Union[CallbackQuery, Message]) -> None:
+    """
+    Хэндлер состояния вывода информации по командам: /lowprice и /highprice.
+    Устанавливает состояния минимальной цены для команды /bestdeal.
+    Конечное состояние для команд: /lowprice и /highprice
+    """
 
     if message.text == 'Да':
         if base_commands.is_best_deal:

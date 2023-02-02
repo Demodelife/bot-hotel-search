@@ -7,6 +7,7 @@ from loguru import logger
 
 @logger.catch
 def get_city_request(city: str) -> Any:
+    """Функция, обрабатывающая запрос города"""
 
     querystring = {"q": city, "locale": "ru_RU"}
 
@@ -33,5 +34,3 @@ def get_city_request(city: str) -> Any:
     except PermissionError as exc:
         logger.exception(exc)
         return False
-
-# print(get_city_request('Берл132ин'))

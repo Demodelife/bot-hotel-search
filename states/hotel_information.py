@@ -2,6 +2,8 @@ from telebot.handler_backends import State, StatesGroup
 
 
 class HotelInfoState(StatesGroup):
+    """Класс состояний для команд: /lowprice, /highprice"""
+
     city = State()
     hotel_amt = State()
     need_photo = State()
@@ -10,6 +12,8 @@ class HotelInfoState(StatesGroup):
 
 
 class BestDealState(HotelInfoState):
+    """Класс состояний для команды /bestdeal"""
+
     price_min = State()
     price_max = State()
     distance = State()

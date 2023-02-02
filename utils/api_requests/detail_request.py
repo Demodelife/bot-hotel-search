@@ -7,6 +7,10 @@ from loguru import logger
 
 @logger.catch
 def post_detail_request(hotel: str, photo_amt: int = None) -> Any:
+    """
+    Функция, обрабатывающая запросы фотографий отеля,
+    а также фотографии для inline-кнопки 'На карте'
+    """
 
     payload = {
         "currency": "USD",
@@ -62,6 +66,3 @@ def post_detail_request(hotel: str, photo_amt: int = None) -> Any:
     except PermissionError as exc:
         logger.exception(exc)
         return False
-
-
-# print(post_detail_request('31702975', 2))

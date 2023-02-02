@@ -9,6 +9,10 @@ tmp_min_price = 0
 
 @bot.message_handler(state=BestDealState.price_min)
 def get_price_min(message: Message) -> None:
+    """
+    Хэндлер состояния минимальной цены для поиска.
+    Устанавливает состояние максимальной цены для поиска
+    """
 
     global tmp_min_price
     if message.text.isdigit() and int(message.text) > 0:
@@ -30,6 +34,10 @@ def get_price_min(message: Message) -> None:
 
 @bot.message_handler(state=BestDealState.price_max)
 def get_price_max(message: Message) -> None:
+    """
+    Хэндлер состояния максимальной цены для поиска.
+    Устанавливает состояние допустимого расстояния от центра для поиска
+    """
 
     if message.text.isdigit() and int(message.text) > tmp_min_price:
         bot.set_state(message.from_user.id, BestDealState.distance, message.chat.id)
@@ -49,6 +57,11 @@ def get_price_max(message: Message) -> None:
 
 @bot.message_handler(state=BestDealState.distance)
 def get_distance(message: Message) -> None:
+    """
+    Хэндлер состояния допустимого расстояния от центра для поиска.
+    Устанавливает состояние вывода информации по команде /bestdeal
+    """
+
     if message.text.isdigit() and int(message.text) > 0:
         bot.set_state(message.from_user.id, BestDealState.info_best_deal)
         bot.send_message(message.from_user.id, choice(['Классно, расстояние у нас есть!\n'

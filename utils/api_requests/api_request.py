@@ -13,6 +13,8 @@ def api_request(method_endswith: str,
                 params: Dict[str, Union[str, int, List, Dict]],
                 method_type: str) -> Any:
 
+    """Функция, определяющая тип API запроса """
+
     url = f"https://hotels4.p.rapidapi.com/{method_endswith}"
 
     headers = {
@@ -34,6 +36,8 @@ def api_request(method_endswith: str,
 
 @logger.catch
 def get_request(url, params, headers):
+    """Функция, обрабатывающая GET запрос"""
+
     try:
         response = requests.get(
             url=url,
@@ -52,6 +56,8 @@ def get_request(url, params, headers):
 
 @logger.catch
 def post_request(url, params, headers):
+    """Функция, обрабатывающая POST запрос"""
+
     try:
         response = requests.post(
             url=url,
