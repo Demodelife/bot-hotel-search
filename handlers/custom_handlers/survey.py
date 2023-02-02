@@ -5,6 +5,7 @@ from keyboards.reply.contact import request_contact
 from os import path
 from datetime import datetime
 from loguru import logger
+from utils.create_surveys_db import Person
 
 
 @bot.message_handler(commands=['survey'])
@@ -76,15 +77,14 @@ def get_contact(message: Message) -> None:
                         f'Город: {data["city"]}\n' \
                         f'Номер телефона: {data["phone_number"]}'
 
-        with open(path.abspath(path.join('database', 'surveys.log')),
-                  'a', encoding='utf-8') as file:
-            time_now = datetime.now().strftime('%d-%b-%Y %H:%M:%S')
-            file.write(f'Дата: {time_now}\n'
-                       f'UserID: {message.from_user.id}\n'
-                       f'UserFullName: {message.from_user.full_name}\n'
-                       f'{full_info}\n\n')
-
         bot.send_message(message.from_user.id, full_info)
+        Person.create(date=datetime.now().strftime('%d-%b-%Y %H:%M:%S'),
+                      userID=message.from_user.id,
+                      name=data['name'],
+                      age=data['age'],
+                      country=data['country'],
+                      city=data['city'],
+                      phone_number=data['phone_number'])
         bot.delete_state(message.from_user.id, message.chat.id)
     elif message.text == 'Нет':
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -97,15 +97,13 @@ def get_contact(message: Message) -> None:
                         f'Город: {data["city"]}\n' \
                         f'Номер телефона: {data["phone_number"]}'
 
-        with open(path.abspath(path.join('database', 'surveys.log')),
-                  'a', encoding='utf-8') as file:
-            time_now = datetime.now().strftime('%d-%b-%Y %H:%M:%S')
-            file.write(f'Дата: {time_now}\n'
-                       f'UserID: {message.from_user.id}\n'
-                       f'UserFullName: {message.from_user.full_name}\n'
-                       f'{full_info}\n\n')
-
         bot.send_message(message.from_user.id, full_info)
+        Person.create(date=datetime.now().strftime('%d-%b-%Y %H:%M:%S'),
+                      userID=message.from_user.id,
+                      name=data['name'],
+                      age=data['age'],
+                      country=data['country'],
+                      city=data['city'])
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Чтобы отправить контактную информацию,\n'

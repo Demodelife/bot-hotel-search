@@ -4,26 +4,43 @@ from states.hotel_information import HotelInfoState
 from utils.api_requests.city_request import get_city_request
 from time import sleep
 from random import choice
-
+from utils.create_search_history_db import User
+from datetime import datetime
 
 is_low_price = None
 is_best_deal = None
 cost_var = None
+user_low = None
+user_high = None
+user_best = None
 
 
 @bot.message_handler(commands=['lowprice', 'highprice', 'bestdeal'])
 def any_command(message: Message) -> None:
-    global is_low_price, is_best_deal, cost_var
+
+    global is_low_price, is_best_deal, cost_var, user_low, user_high, user_best
+
     if message.text[1:] == 'lowprice':
         is_low_price, is_best_deal = True, False
         cost_var = 'дешевые'
+        user_low = User.create(name=message.from_user.full_name,
+                               userID=message.from_user.id,
+                               command='lowprice',
+                               time=datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
 
     elif message.text[1:] == 'bestdeal':
         is_best_deal, is_low_price = True, False
-
+        user_best = User.create(name=message.from_user.full_name,
+                                userID=message.from_user.id,
+                                command='bestdeal',
+                                time=datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
     else:
         is_low_price, is_best_deal = False, False
         cost_var = 'дорогие'
+        user_high = User.create(name=message.from_user.full_name,
+                                userID=message.from_user.id,
+                                command='highprice',
+                                time=datetime.now().strftime('%d-%b-%Y %H:%M:%S'))
 
     bot.set_state(message.from_user.id, HotelInfoState.city, message.chat.id)
     bot.send_message(message.from_user.id, choice(['Введите название города',

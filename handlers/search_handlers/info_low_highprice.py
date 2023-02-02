@@ -8,6 +8,7 @@ from random import choice
 from . import base_commands
 from keyboards.inline.all_keyboards import row_address_and_on_map
 from loguru import logger
+from utils.create_search_history_db import HotelLowPrice, HotelHighPrice
 
 
 @logger.catch
@@ -51,8 +52,10 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
 
             if base_commands.is_low_price:
                 sorting = low_to_high
+                owner = base_commands.user_low
             else:
                 sorting = high_to_low
+                owner = base_commands.user_high
 
             offers = post_hotels_request(data['cityID'], data['hotel_amt'], sorting)
 
@@ -75,6 +78,17 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                      f'<i>Цена: {i_info[1][1]}</i>',
                                      reply_markup=row_address_and_on_map(i_info[0]),
                                      parse_mode='html')
+
+                    if base_commands.is_low_price:
+                        HotelLowPrice.create(owner=owner,
+                                             city=data['city'],
+                                             name=i_info[1][0],
+                                             price=i_info[1][1])
+                    else:
+                        HotelHighPrice.create(owner=owner,
+                                              city=data['city'],
+                                              name=i_info[1][0],
+                                              price=i_info[1][1])
                     count += 1
                 else:
                     bot.delete_state(message.from_user.id, message.chat.id)
@@ -94,6 +108,17 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                      f'<i>Цена: {i_offer[1][1]}</i>',
                                      reply_markup=row_address_and_on_map(i_offer[0]),
                                      parse_mode='html')
+
+                    if base_commands.is_low_price:
+                        HotelLowPrice.create(owner=owner,
+                                             city=data['city'],
+                                             name=i_offer[1][0],
+                                             price=i_offer[1][1])
+                    else:
+                        HotelHighPrice.create(owner=owner,
+                                              city=data['city'],
+                                              name=i_offer[1][0],
+                                              price=i_offer[1][1])
                     count += 1
 
                     for i_name, i_lst in offer_with_photo.items():
