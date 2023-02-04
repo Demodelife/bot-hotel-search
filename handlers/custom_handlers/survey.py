@@ -2,10 +2,10 @@ from loader import bot
 from states.contact_information import UserInfoState
 from telebot.types import Message
 from keyboards.reply.contact import request_contact
-from os import path
 from datetime import datetime
 from loguru import logger
-from utils.create_surveys_db import Person
+from database.hotels_db import PersonSurvey
+from telebot.types import ReplyKeyboardRemove
 
 
 @bot.message_handler(commands=['survey'])
@@ -27,6 +27,7 @@ def get_name(message: Message) -> None:
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['name'] = message.text
+
     else:
         bot.send_message(message.from_user.id, 'Какое странное у тебя имя...🤔'
                                                'Может проверишь - нет ли там цифр...')
@@ -43,6 +44,7 @@ def get_age(message: Message) -> None:
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['age'] = message.text
+
     else:
         bot.send_message(message.from_user.id, 'Возраст вообще-то состоит из цифр...🤔')
 
@@ -79,46 +81,47 @@ def get_contact(message: Message) -> None:
     """Хэндлер состояния номера телефона"""
 
     if message.content_type == 'contact':
+
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['phone_number'] = message.contact.phone_number
 
-            full_info = 'Спасибо за прохождение опроса! Ваши данные:\n' \
-                        f'Имя: {data["name"]}\n' \
-                        f'Возраст: {data["age"]}\n' \
-                        f'Страна: {data["country"]}\n' \
-                        f'Город: {data["city"]}\n' \
-                        f'Номер телефона: {data["phone_number"]}'
+        full_info = 'Спасибо за прохождение опроса! Ваши данные:\n' \
+                    f'Имя: {data["name"]}\n' \
+                    f'Возраст: {data["age"]}\n' \
+                    f'Страна: {data["country"]}\n' \
+                    f'Город: {data["city"]}\n' \
+                    f'Номер телефона: {data["phone_number"]}'
 
-        bot.send_message(message.from_user.id, full_info)
-        Person.create(date=datetime.now().strftime('%d-%b-%Y %H:%M:%S'),
-                      userID=message.from_user.id,
-                      name=data['name'],
-                      age=data['age'],
-                      country=data['country'],
-                      city=data['city'],
-                      phone_number=data['phone_number'])
+        bot.send_message(message.from_user.id, full_info, reply_markup=ReplyKeyboardRemove())
+        PersonSurvey.create(date=datetime.now().strftime('%d-%b-%Y %H:%M:%S'),
+                            userID=message.from_user.id,
+                            name=data['name'],
+                            age=data['age'],
+                            country=data['country'],
+                            city=data['city'],
+                            phone_number=data['phone_number'])
         bot.delete_state(message.from_user.id, message.chat.id)
     elif message.text == 'Нет':
+
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['phone_number'] = message.text
 
-            full_info = 'Спасибо за прохождение опроса! Ваши данные:\n' \
-                        f'Имя: {data["name"]}\n' \
-                        f'Возраст: {data["age"]}\n' \
-                        f'Страна: {data["country"]}\n' \
-                        f'Город: {data["city"]}\n' \
-                        f'Номер телефона: {data["phone_number"]}'
+        full_info = 'Спасибо за прохождение опроса! Ваши данные:\n' \
+                    f'Имя: {data["name"]}\n' \
+                    f'Возраст: {data["age"]}\n' \
+                    f'Страна: {data["country"]}\n' \
+                    f'Город: {data["city"]}\n' \
+                    f'Номер телефона: {data["phone_number"]}'
 
-        bot.send_message(message.from_user.id, full_info)
-        Person.create(date=datetime.now().strftime('%d-%b-%Y %H:%M:%S'),
-                      userID=message.from_user.id,
-                      name=data['name'],
-                      age=data['age'],
-                      country=data['country'],
-                      city=data['city'])
+        bot.send_message(message.from_user.id, full_info, reply_markup=ReplyKeyboardRemove())
+        PersonSurvey.create(date=datetime.now().strftime('%d-%b-%Y %H:%M:%S'),
+                            userID=message.from_user.id,
+                            name=data['name'],
+                            age=data['age'],
+                            country=data['country'],
+                            city=data['city'])
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, 'Чтобы отправить контактную информацию,\n'
                                                'нажми на кнопку "Отправить контакт"\n'
                                                'Или напишите "Нет"')
-

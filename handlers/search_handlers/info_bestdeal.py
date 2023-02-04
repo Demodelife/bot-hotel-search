@@ -5,10 +5,9 @@ from states.hotel_information import BestDealState
 from utils.api_requests.hotels_request import post_hotels_request
 from utils.api_requests.detail_request import post_detail_request
 from random import choice
-from . import base_commands
 from keyboards.inline.all_keyboards import row_address_and_on_map
 from loguru import logger
-from utils.create_search_history_db import HotelBestDeal
+from database.hotels_db import HotelBestDeal
 
 
 @logger.catch
@@ -20,7 +19,9 @@ def info_best_deal(message: Message) -> None:
     """
 
     if message.text == 'Да':
+
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+
             if data['need_photo']:
                 full_info = f"Замечательно!\nВаш запрос:\n" \
                             f'<b>"Лучшие по цене и расположению"</b>\n' \
@@ -58,7 +59,9 @@ def info_best_deal(message: Message) -> None:
                                      distance=data['distance'])
 
         sort_offers = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
-        owner = base_commands.user_best
+
+        owner = data['user_best']
+
         if offers and not data['need_photo']:
             bot.send_message(message.from_user.id, choice(['Подобраны следующие варианты:',
                                                            'Что удалось подобрать:',
@@ -84,6 +87,10 @@ def info_best_deal(message: Message) -> None:
                 bot.delete_state(message.from_user.id, message.chat.id)
 
         elif offers and data['need_photo']:
+            bot.send_message(message.from_user.id, choice(['Подобраны следующие варианты:',
+                                                           'Что удалось подобрать:',
+                                                           'Подобрал следующее:']))
+
             count = 1
 
             for i_offer in sort_offers:
@@ -114,6 +121,7 @@ def info_best_deal(message: Message) -> None:
                                                caption=f'{i_desc}')
             else:
                 bot.delete_state(message.from_user.id, message.chat.id)
+
         else:
             bot.send_message(message.from_user.id, 'К сожалению, не нашел подходящих вариантов😔\n'
                                                    'Либо произошла какая-то ошибка на сервере⚠\n'

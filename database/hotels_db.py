@@ -1,7 +1,7 @@
-from peewee import *
+from peewee import SqliteDatabase, Model, CharField, IntegerField, DateTimeField, ForeignKeyField
 from os import path
 
-db = SqliteDatabase(path.join('database', 'search_history.db'))
+db = SqliteDatabase(path.join('database', 'users.db'))
 
 
 class User(Model):
@@ -53,4 +53,19 @@ class HotelBestDeal(Model):
         database = db
 
 
-db.create_tables([User, HotelLowPrice, HotelHighPrice, HotelBestDeal])
+class PersonSurvey(Model):
+    """Класс БД: Пользователь опросника"""
+
+    date = DateTimeField()
+    userID = IntegerField()
+    name = CharField()
+    age = IntegerField()
+    country = CharField()
+    city = CharField()
+    phone_number = IntegerField(default='No')
+
+    class Meta:
+        database = db
+
+
+tables = [User, HotelLowPrice, HotelHighPrice, HotelBestDeal, PersonSurvey]

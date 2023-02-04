@@ -4,9 +4,6 @@ from states.hotel_information import BestDealState
 from random import choice
 
 
-tmp_min_price = 0
-
-
 @bot.message_handler(state=BestDealState.price_min)
 def get_price_min(message: Message) -> None:
     """
@@ -14,9 +11,7 @@ def get_price_min(message: Message) -> None:
     Устанавливает состояние максимальной цены для поиска
     """
 
-    global tmp_min_price
     if message.text.isdigit() and int(message.text) > 0:
-        tmp_min_price = int(message.text)
         bot.set_state(message.from_user.id, BestDealState.price_max, message.chat.id)
         bot.send_message(message.from_user.id, choice(['Теперь введите максимальную цену {$}',
                                                        'А сейчас нужна максимальная цена для поиска ($)',
@@ -39,15 +34,16 @@ def get_price_max(message: Message) -> None:
     Устанавливает состояние допустимого расстояния от центра для поиска
     """
 
-    if message.text.isdigit() and int(message.text) > tmp_min_price:
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        price_min = data['price_min']
+
+    if message.text.isdigit() and int(message.text) > price_min:
         bot.set_state(message.from_user.id, BestDealState.distance, message.chat.id)
         bot.send_message(message.from_user.id, choice(['А теперь введите расстояние до центра города (км)',
                                                        'Теперь мне нужно знать -\n'
                                                        'Какое расстояние до центра вас устроит (км)?',
                                                        'Теперь нужно ввести расстояние до центра города (км)']))
-
-        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            data['price_max'] = int(message.text)
+        data['price_max'] = int(message.text)
     else:
         bot.send_message(message.from_user.id, 'Цена должна быть положительным числом?\n'
                                                'А также проверьте🧐 -\n'
@@ -70,7 +66,6 @@ def get_distance(message: Message) -> None:
                                                        'Вывести информацию по запросу?',
                                                        'Отлично, расстояние получено!\n'
                                                        'Отобразить информацию по запросу?']))
-
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['distance'] = int(message.text)
     else:

@@ -5,10 +5,9 @@ from states.hotel_information import HotelInfoState, BestDealState
 from utils.api_requests.hotels_request import post_hotels_request
 from utils.api_requests.detail_request import post_detail_request
 from random import choice
-from . import base_commands
 from keyboards.inline.all_keyboards import row_address_and_on_map
 from loguru import logger
-from utils.create_search_history_db import HotelLowPrice, HotelHighPrice
+from database.hotels_db import HotelLowPrice, HotelHighPrice
 
 
 @logger.catch
@@ -21,27 +20,30 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
     """
 
     if message.text == 'Да':
-        if base_commands.is_best_deal:
+
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+            is_best_deal = data['is_best_deal']
+
+        if is_best_deal:
             bot.set_state(message.from_user.id, BestDealState.price_min, message.chat.id)
             bot.send_message(message.from_user.id, choice(['Введите минимальную цену для поиска($)',
                                                            'Нужна минимальная цена для поиска ($)',
                                                            'Пожалуйста, введите минимальную цену для поиска ($)']))
         else:
-            with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
 
-                if data['need_photo']:
+            if data['need_photo']:
 
-                    full_info = f"Чудесно!\nВаш запрос:\n" \
-                                f'<b>"Самые {base_commands.cost_var} отели в городе"</b>\n' \
-                                f"Город: {data['city']}\n" \
-                                f"Количество отелей: {data['hotel_amt']}\n" \
-                                f"Количество фотографий: {data['photo_amt']}"
-                else:
-                    full_info = f"Отлично!\nВаш запрос:\n" \
-                                f'<b>"Самые {base_commands.cost_var} отели в городе"</b>\n' \
-                                f"Город: {data['city']}\n" \
-                                f"Количество отелей: {data['hotel_amt']}\n" \
-                                f"Без фотографий"
+                full_info = f"Чудесно!\nВаш запрос:\n" \
+                            f'<b>"Самые {data["cost"]} отели в городе"</b>\n' \
+                            f"Город: {data['city']}\n" \
+                            f"Количество отелей: {data['hotel_amt']}\n" \
+                            f"Количество фотографий: {data['photo_amt']}"
+            else:
+                full_info = f"Отлично!\nВаш запрос:\n" \
+                            f'<b>"Самые {data["cost"]} отели в городе"</b>\n' \
+                            f"Город: {data['city']}\n" \
+                            f"Количество отелей: {data['hotel_amt']}\n" \
+                            f"Без фотографий"
 
             bot.send_message(message.from_user.id, full_info, parse_mode='html')
             bot.send_message(message.from_user.id, choice(['Ожидайте...',
@@ -55,21 +57,21 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
             low_to_high = "PRICE_LOW_TO_HIGH"
             high_to_low = "PRICE_HIGH_TO_LOW"
 
-            if base_commands.is_low_price:
+            if data['is_low_price']:
                 sorting = low_to_high
-                owner = base_commands.user_low
+                owner = data['user_low']
             else:
                 sorting = high_to_low
-                owner = base_commands.user_high
+                owner = data['user_high']
 
             offers = post_hotels_request(data['cityID'], data['hotel_amt'], sorting)
 
-            if offers and not data['need_photo']:
+            if sorting == "PRICE_LOW_TO_HIGH":
+                sort_val = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
+            else:
+                sort_val = sorted(offers.items(), key=lambda val: int(val[1][1][1:]), reverse=True)
 
-                if sorting == "PRICE_LOW_TO_HIGH":
-                    sort_val = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
-                else:
-                    sort_val = sorted(offers.items(), key=lambda val: int(val[1][1][1:]), reverse=True)
+            if offers and not data['need_photo']:
 
                 bot.send_message(message.from_user.id, choice(['Подобраны следующие варианты:',
                                                                'Что удалось подобрать:',
@@ -84,7 +86,7 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                      reply_markup=row_address_and_on_map(i_info[0]),
                                      parse_mode='html')
 
-                    if base_commands.is_low_price:
+                    if data['is_low_price']:
                         HotelLowPrice.create(owner=owner,
                                              city=data['city'],
                                              name=i_info[1][0],
@@ -99,13 +101,13 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                     bot.delete_state(message.from_user.id, message.chat.id)
 
             elif offers and data['need_photo']:
-                sort_offers = sorted(offers.items(), key=lambda val: int(val[1][1][1:]))
+
                 bot.send_message(message.from_user.id, choice(['Подобраны следующие варианты:',
                                                                'Что удалось подобрать:',
                                                                'Подобрал следующее:']))
                 count = 1
 
-                for i_offer in sort_offers:
+                for i_offer in sort_val:
                     offer_with_photo = post_detail_request(i_offer[0], data['photo_amt'])
 
                     bot.send_message(message.from_user.id,
@@ -114,7 +116,7 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                      reply_markup=row_address_and_on_map(i_offer[0]),
                                      parse_mode='html')
 
-                    if base_commands.is_low_price:
+                    if data['is_low_price']:
                         HotelLowPrice.create(owner=owner,
                                              city=data['city'],
                                              name=i_offer[1][0],
@@ -136,6 +138,7 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                                    caption=f'{i_desc}')
                 else:
                     bot.delete_state(message.from_user.id, message.chat.id)
+
             else:
                 bot.send_message(message.from_user.id, choice(['Произошла какая-то ошибка на сервере.\n'
                                                                'Попробуйте выбрать другой город',
@@ -143,7 +146,6 @@ def info_low_high(message: Union[CallbackQuery, Message]) -> None:
                                                                'Попробуйте выбрать другой город',
                                                                'Что-то случилось на сервере\n'
                                                                'Выберите другой город']))
-
     else:
         bot.send_message(message.from_user.id, choice(['Скажите же мне "Да"',
                                                        'Ну прошу вас 🙏\n'

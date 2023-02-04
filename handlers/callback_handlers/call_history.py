@@ -1,7 +1,7 @@
 from loader import bot
 from telebot.types import CallbackQuery
 from loguru import logger
-from utils.create_search_history_db import *
+from database.hotels_db import User
 from keyboards.inline.all_keyboards import delete_history
 
 
