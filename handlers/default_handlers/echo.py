@@ -1,10 +1,10 @@
-# from telebot.types import Message
-#
-# from loader import bot
-#
-#
-# # Эхо хендлер, куда летят текстовые сообщения без указанного состояния
-# @bot.message_handler(state=None)
-# def bot_echo(message: Message):
-#     bot.reply_to(message, "Эхо без состояния или фильтра.\nСообщение:"
-#                           f"{message.text}")
+from telebot.types import Message
+from loader import bot
+
+
+@bot.message_handler(state=None)
+def bot_echo(message: Message):
+    """Эхо-бот без состояния, отвечающий повторением сообщения от пользователя"""
+
+    bot.reply_to(message, f"Для выбора команды для меня переходите сюда - /help\n"
+                          f"Иначе я простая повторюшка🙃: {message.text}")
